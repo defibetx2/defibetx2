@@ -21,7 +21,7 @@ Game Rules
 
 -The loser will lose all his money, better luck next time :(
 
--if an opponent has not been found yet and you want to retire your money, yo will get 97.8% of your money back, so think carefully before placing a bet
+-if an opponent has not been found yet and you want to retire your money, you will get 97.8% of your money back, so think carefully before placing a bet
 
 -if your opponent retires you will get all your money back so you can place a new bet
 
