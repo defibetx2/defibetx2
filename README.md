@@ -8,6 +8,7 @@
 are you ready for the adrenaline?
 
 Game Rules
+
 -First the player choose how much he wants to bet
 
 -The player then select wheter he wants to bet high or low
