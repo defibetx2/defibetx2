@@ -11,19 +11,19 @@ Game Rules
 
 -First the player choose how much he wants to bet
 
--The player then select wheter he wants to bet high or low
+-The player then select wheter he wants to bet heads or tails
 
--The smart contract generates a random number from 0-9, if number is between 0-4 the player that bet low will win, if number is between 5-9 the player that bet high will win
+-The smart contract generates a random number from 0-9, if number is between 0-4 the player that bet tails will win, if number is between 5-9 the player that bet heads will win
 
--have in mind that two players, each one in the opposite site are needed for a match to happen, so the game may not be played instantly
+-Have in mind that two players, each one in the opposite site are needed for a match to happen, so the game may not be played instantly
 
 -The winner will win 196.8% or X1.968 of the money he bets, the remaining 3.2% will go to the developers  [we need to eat and grow :)]
 
 -The loser will lose all his money, better luck next time :(
 
--if an opponent has not been found yet and you want to retire your money, you will get 97.8% of your money back, so think carefully before placing a bet
+-If an opponent has not been found yet and you want to retire your money, you will get 97.8% of your money back, so think carefully before placing a bet
 
--if your opponent retires you will get all your money back so you can place a new bet
+-If your opponent retires you will get all your money back so you can place a new bet
 
 -Only one bet at a time allowed in each category
 
