@@ -1,25 +1,26 @@
 pragma solidity >=0.7.0 <0.9.0;
 
-contract DefiBetX2_10e{
+contract CoinFlip_10{
     mapping(address=>gamble[]) public gambleList; //lists of gambles by address
     mapping(address=>uint) gambleCount; //number of gambles by account
-    mapping(address=>bool)  state10; //indicates if the address already has a bet
+    mapping(address=>bool)  public isAvailable; //indicates if the address already has a bet
+    mapping(address=>bool)  public winners; // list of winner available to claim price
     address burn=0x000000000000000000000000000000000000dEaD; //burn address on ethereum used to fill the first places on the arrays
-    address[]  high10; //List of address betting high
-    address[]  low10; //List of address betting low
-    uint ammount10 = 10 ether; //the bet
+    address[]  headsLine; //List of address betting high
+    address[]  tailsLine; //List of address betting low
+    uint ammount = 10 ether; //the bet
     address payable owner; // the owner of this contract
-    uint index10; //current bet being played
-    uint highIndex10; //indicates how many address are betting high
-    uint lowIndex10; //indicates how many address are betting low
+    uint betIndex; //current bet being played
+    uint headsLineIndex; //indicates how many address are betting high
+    uint tailsLineIndex; //indicates how many address are betting low
     uint withdrawableAmmount= 0 ether; //earnings of the owner
     
     struct gamble{
         address player;
         address opponent;
-        uint bet;
         string choice;
         address winner;
+        uint number;
     }
     
     modifier onlyOwner(){
@@ -29,74 +30,77 @@ contract DefiBetX2_10e{
     
     constructor(){
         owner=payable(msg.sender);
-        index10=1;
-        highIndex10= 1;
-        lowIndex10= 1;
-        high10.push(burn);
-        low10.push(burn);
+        betIndex=1;
+        headsLineIndex= 1;
+        tailsLineIndex= 1;
+        headsLine.push(burn);
+        tailsLine.push(burn);
     }
 
-    function enterHigh10() external payable returns(uint){
-        require(msg.value== ammount10 && state10[msg.sender]==false); //verifying if the ammount is correct and if they dont have anothe ber in this category
-        state10[msg.sender]=true;
-        high10.push(msg.sender);
-        highIndex10++;
-        gambleCount[msg.sender]++;
-        return play10();
+    function enterheadsLine() external payable returns(uint){
+        require(msg.value== ammount && isAvailable[msg.sender]==false); //verifying if the ammount is correct and if they dont have anothe ber in this category
+        isAvailable[msg.sender]=true;
+        headsLine.push(msg.sender);
+        headsLineIndex++;
+        return play();
     }
     
-    function enterLow10() external payable returns(uint){
-        require(msg.value== ammount10 && state10[msg.sender]==false); //verifying if the ammount is correct and if they dont have anothe ber in this category
-        state10[msg.sender]=true;
-        low10.push(msg.sender);
-        lowIndex10++;
-        gambleCount[msg.sender]++;
-        return play10();
+    function entertailsLine() external payable returns(uint){
+        require(msg.value== ammount && isAvailable[msg.sender]==false); //verifying if the ammount is correct and if they dont have anothe ber in this category
+        isAvailable[msg.sender]=true;
+        tailsLine.push(msg.sender);
+        tailsLineIndex++;
+        return play();
     }
     
-    function play10() internal  returns(uint){
+    function play() internal  returns(uint){
         uint randNumber;
-        address payable winner;
         address payable refund;
-        if(index10<highIndex10 && index10<lowIndex10){
-            if(state10[high10[index10]]==true  && state10[low10[index10]]==true){
-                randNumber=uint(keccak256(abi.encodePacked(block.timestamp, high10[index10], low10[index10])))%10;
+        if(betIndex<headsLineIndex && betIndex<tailsLineIndex){
+            if(isAvailable[headsLine[betIndex]]==true  && isAvailable[tailsLine[betIndex]]==true){
+                randNumber=uint(keccak256(abi.encodePacked(block.timestamp, headsLine[betIndex], tailsLine[betIndex])))%10;
                 if(randNumber>=5){
-                    winner =payable(high10[index10]);
-                    gambleList[high10[index10]].push(gamble(high10[index10],low10[index10],10 ether,"high",high10[index10]));
-                    gambleList[low10[index10]].push(gamble(low10[index10],high10[index10],10 ether,"low",high10[index10]));
-                }
-                
+                    winners[headsLine[betIndex]]=true;
+                    gambleList[headsLine[betIndex]].push(gamble(headsLine[betIndex],tailsLine[betIndex],"heads",headsLine[betIndex],randNumber));
+                    gambleList[tailsLine[betIndex]].push(gamble(tailsLine[betIndex],headsLine[betIndex],"tails",headsLine[betIndex],randNumber));
+                    gambleCount[headsLine[betIndex]]++;
+                    gambleCount[tailsLine[betIndex]]++;
+                    isAvailable[tailsLine[betIndex]]=false;//allowing player to enter another bet in this category
+            }
                 else{
-                    winner =payable(low10[index10]); 
-                    gambleList[high10[index10]].push(gamble(high10[index10],low10[index10],10 ether,"high",low10[index10]));
-                    gambleList[low10[index10]].push(gamble(low10[index10],high10[index10],10 ether,"low",low10[index10]));
+                    winners[tailsLine[betIndex]]=true;
+                    gambleList[headsLine[betIndex]].push(gamble(headsLine[betIndex],tailsLine[betIndex],"heads",tailsLine[betIndex],randNumber));
+                    gambleList[tailsLine[betIndex]].push(gamble(tailsLine[betIndex],headsLine[betIndex],"tails",tailsLine[betIndex],randNumber));
+                    gambleCount[headsLine[betIndex]]++;
+                    gambleCount[tailsLine[betIndex]]++;
+                    isAvailable[headsLine[betIndex]]=false;//allowing player to enter another bet in this category
                 }
             
-                winner.transfer(19.36 ether); //transfering funds to the winner
                 withdrawableAmmount= withdrawableAmmount+ 0.64 ether;
-                state10[high10[index10]]=false; //allowing player to enter another bet in this category
-                state10[low10[index10]]=false; //allowing player to enter another bet in this category
-                index10++;
+                betIndex++;
             }
             
             else{
                 randNumber=10;
-                if(state10[high10[index10]]==true){
-                    refund=payable(high10[index10]);
+                if(isAvailable[headsLine[betIndex]]==true){
+                    isAvailable[headsLine[betIndex]]=false;
+                    refund=payable(headsLine[betIndex]);
                     refund.transfer(10 ether);
-                    state10[high10[index10]]=false;
-                    gambleList[high10[index10]].push(gamble(high10[index10],low10[index10],10 ether,"opponent retired",0x000000000000000000000000000000000000dEaD));
-                    gambleList[low10[index10]].push(gamble(low10[index10],high10[index10],10 ether,"you retired",0x000000000000000000000000000000000000dEaD));
+                    gambleList[headsLine[betIndex]].push(gamble(headsLine[betIndex],tailsLine[betIndex],"opponent retired",0x000000000000000000000000000000000000dEaD,randNumber));
+                    gambleList[tailsLine[betIndex]].push(gamble(tailsLine[betIndex],headsLine[betIndex],"you retired",0x000000000000000000000000000000000000dEaD,randNumber));
+                    gambleCount[headsLine[betIndex]]++;
+                    gambleCount[tailsLine[betIndex]]++;
                 }
-                if(state10[low10[index10]]==true){
-                    refund=payable(low10[index10]);
+                if(isAvailable[tailsLine[betIndex]]==true){
+                    isAvailable[tailsLine[betIndex]]=false;
+                    refund=payable(tailsLine[betIndex]);
                     refund.transfer(10 ether);
-                    state10[low10[index10]]=false;
-                    gambleList[high10[index10]].push(gamble(high10[index10],low10[index10],10 ether,"you retired",0x000000000000000000000000000000000000dEaD));
-                    gambleList[low10[index10]].push(gamble(low10[index10],high10[index10],10 ether,"opponent retired",0x000000000000000000000000000000000000dEaD));
+                    gambleList[headsLine[betIndex]].push(gamble(headsLine[betIndex],tailsLine[betIndex],"you retired",0x000000000000000000000000000000000000dEaD,randNumber));
+                    gambleList[tailsLine[betIndex]].push(gamble(tailsLine[betIndex],headsLine[betIndex],"opponent retired",0x000000000000000000000000000000000000dEaD,randNumber));
+                    gambleCount[headsLine[betIndex]]++;
+                    gambleCount[tailsLine[betIndex]]++;
                 }
-                index10++;
+                betIndex++;
             }
         }
         else{
@@ -104,21 +108,45 @@ contract DefiBetX2_10e{
         }
         return randNumber;
     }
-    
-    function retire10() external{
-        require(state10[msg.sender]==true);
+
+    function retire() external{
+        require(isAvailable[msg.sender]==true);
         address payable quiter= payable(msg.sender);
-        state10[msg.sender]=false;
+        isAvailable[msg.sender]=false;
         quiter.transfer(9.68 ether);
         withdrawableAmmount= withdrawableAmmount+ 0.32 ether;
     }
-
-    function checkState10()external view returns (bool){
-        return state10[msg.sender];
+    
+    function claimPrice() external{
+        require(winners[msg.sender]==true);
+        address payable winner= payable(msg.sender);
+        winner.transfer(19.36 ether);
+        winners[msg.sender]=false;
+        isAvailable[msg.sender]=false;
     }
     
+    function checkisAvailable() external view returns (bool){
+        return isAvailable[msg.sender];
+    }
+    function lastGambleNumber() external view returns (uint){
+        require(gambleCount[msg.sender]>=1);
+        return gambleList[msg.sender][gambleCount[msg.sender]-1].number;
+    }
+    function lastGambleOpponent() external view returns (address){
+        require(gambleCount[msg.sender]>=1);
+        return gambleList[msg.sender][gambleCount[msg.sender]-1].opponent;
+    }
+    function lastGambleChoice() external view returns (string memory){
+        require(gambleCount[msg.sender]>=1);
+        return gambleList[msg.sender][gambleCount[msg.sender]-1].choice;
+    }
+    function lastGamble() external view returns (gamble memory){
+        require(gambleCount[msg.sender]>=1);
+        return gambleList[msg.sender][gambleCount[msg.sender]-1];
+    }
     function withdraw() external onlyOwner{
         owner.transfer(withdrawableAmmount);
+        withdrawableAmmount=0 ether;
     }
     
     function changeOwner(address _newOwner) external onlyOwner{ //change the owner of the contract
