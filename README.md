@@ -5,7 +5,7 @@
 - 📫 player vs player with no intervention by the developers
 - 📫 How to reach me defibetx2@gmail.com
 
-are you ready for the adrenaline?
+DO YOU FEEL LUCKY?
 
 Game Rules
 
